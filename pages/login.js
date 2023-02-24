@@ -2,14 +2,25 @@ import Head from 'next/head'
 import LandingPage from '@/components/landingpage/landingpage';
 import { AntDesignOutlined } from '@ant-design/icons'; 
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { signIn, getCsrfToken } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 const { Header, Content, Footer, Sider } = Layout; 
 
-export default function Home() {
+export default function Login({ csrfToken }) {
+ const router = useRouter();
   const {
     token: { colorBgContainer },
   } = theme.useToken();
-  
+  const onSubmit = async (values) =>{
+    const res = await signIn('credentials', {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+        callbackUrl: `${window.location.origin}`,
+      });
+      if (res.url) router.push(res.url);
+  }
   return (
     <>
       <Head>
@@ -46,7 +57,7 @@ export default function Home() {
           </div>
 
           <div id="login">
-            <LandingPage />
+            <LandingPage onSubmit={onSubmit} />
           </div>
 
       </div>
@@ -62,3 +73,11 @@ export default function Home() {
     </>
   )
 }
+
+// export async function getServerSideProps(context) {
+//     return {
+//       props: {
+//         csrfToken: await getCsrfToken(context),
+//       },
+//     };
+//   }
